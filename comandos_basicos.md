@@ -1,45 +1,4 @@
-# Docker
-
-## 1) Sistema de contenedores más popular
-Docker permite realizar pruebas o test en diferentes máquinas de forma consistente.
-
-### Características:
-- Es similar a una máquina virtual, pero sin su propio sistema operativo.
-- Usa una parte aislada del sistema operativo.
-
----
-
-## 2) Tipos de Docker
-
-### a) Docker Desktop
-- Sin restricción de licencia.
-- Trabaja sobre una máquina virtual de Linux.
-- Disponible para Windows.
-- Tiene interfaz visual.
-
-### b) Docker Engine
-- Funciona directamente sobre Linux.
-
----
-
-## 3) Partes de Docker
-
-### a) Docker Hub
-- Repositorio de imágenes Docker.
-
-### b) Dockerfile
-- Archivo de texto que contiene las instrucciones para construir una imagen.
-
-### c) Imagen
-- Archivo binario con todo lo necesario para ejecutar un contenedor.
-- Es una plantilla para crear instancias (contenedores).
-
-### d) Contenedor
-- Instancia en ejecución de una imagen.
-- Proceso que se ejecuta en un entorno aislado.
-- Contiene una aplicación y sus dependencias.
-
----
+# Docker: Comandos básicos
 
 ## 4) Comandos de activación e información de contenedores
 
@@ -119,10 +78,66 @@ docker cp mi-contenedor:/datos/archivo.txt archivo.txt  # Copiar archivo del con
 
 ---
 
-## 10) Redes en Docker
+## 13) Redes en Docker
 
+### Tipos de redes y segregación en Docker
+Docker permite la creación de redes para que los contenedores se comuniquen entre sí o estén aislados de otros.
+
+#### a) Comandos para gestionar redes en Docker
 ```sh
-docker network create mi-red        # Crear una red
+docker network # Ver comandos de redes en Docker
+```
+
+#### b) Crear una red en Docker
+```sh
+docker network create mi-red
+```
+
+#### c) Especificar el driver de red al crear una red
+```sh
+docker network create --driver bridge mi-red
+```
+
+##### i) Tipos de drivers de redes en Docker:
+1. **Bridge**: Red por defecto que permite la comunicación entre contenedores en el mismo host.
+2. **Host**: Los contenedores comparten la red del host (puede implicar riesgos de seguridad).
+3. **Overlay**: Permite la comunicación entre contenedores en diferentes hosts.
+4. **Macvlan**: Asigna una dirección MAC a un contenedor, funcionando como un dispositivo físico.
+5. **None**: El contenedor no tiene acceso a la red.
+
+#### d) Ver lista de redes en Docker
+```sh
+docker network ls
+```
+
+#### e) Inspeccionar una red específica
+```sh
+docker network inspect mi-red
+```
+
+#### f) Conectar un contenedor a una red específica al iniciarlo
+```sh
+docker run -d --name mi-contenedor --network mi-red nginx
+```
+
+#### g) Conectar un contenedor existente a una red existente
+```sh
+docker network connect mi-red mi-contenedor
+```
+
+#### h) Desconectar un contenedor de una red
+```sh
+docker network disconnect mi-red mi-contenedor
+```
+
+#### i) Eliminar una red en Docker
+```sh
+docker network rm mi-red
+```
+
+#### j) Eliminar todas las redes inactivas (excepto bridge, host y none)
+```sh
+docker network prune
 ```
 
 ---

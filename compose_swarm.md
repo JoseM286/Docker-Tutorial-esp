@@ -1,0 +1,154 @@
+# Docker: Compose y Swarm
+
+## 14) Docker Compose
+
+Docker Compose permite definir y ejecutar aplicaciones en contenedores mediante un solo archivo de configuración (`docker-compose.yaml`).
+
+### a) Servicios
+Definen las imágenes, puertos, volúmenes, redes y variables de entorno de los contenedores.
+
+### b) Volúmenes
+Automatiza la gestión de volúmenes sin necesidad de crearlos manualmente.
+
+### c) Redes
+Automatiza la creación y gestión de redes.
+
+### d) Secretos y configuraciones
+Definen credenciales y configuraciones seguras (solo funciona en Docker Swarm).
+
+#### i) Comandos útiles de Docker Compose:
+```sh
+docker compose          # Muestra los comandos disponibles
+
+docker compose up       # Levanta los servicios definidos en el compose file
+
+docker compose up -d    # Levanta los servicios en segundo plano
+
+docker compose down     # Detiene y elimina los servicios
+
+docker compose down -v  # Elimina contenedores y volúmenes
+
+docker compose ps       # Muestra el estado de los servicios
+
+docker compose logs     # Muestra los logs de los servicios
+
+docker compose exec <servicio> <comando>  # Ejecuta un comando en un servicio
+
+docker compose -f /ruta/al/fichero.yaml up  # Ejecutar compose desde una ruta específica
+```
+
+Para salir de `docker compose up` en primer plano, usa:
+```sh
+Ctrl + C
+```
+
+---
+
+## e) Ejemplos de Docker Compose
+
+### i) Ejemplo básico con Nginx
+```yaml
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+```
+
+### ii) Mismo ejemplo pero usando un Dockerfile
+```yaml
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+```
+
+### iii) Instalación de WordPress con MariaDB y volúmenes
+```yaml
+services:
+  db:
+    image: mariadb:10.6.4-focal
+    command: '--default-authentication-plugin=mysql_native_password'
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=somewordpress
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wordpress
+      - MYSQL_PASSWORD=wordpress
+    expose:
+      - 3306
+      - 33060
+
+  wordpress:
+    image: wordpress:latest
+    volumes:
+      - wp_data:/var/www/html
+    ports:
+      - 80:80
+    restart: always
+    environment:
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_DB_USER=wordpress
+      - WORDPRESS_DB_PASSWORD=wordpress
+      - WORDPRESS_DB_NAME=wordpress
+
+volumes:
+  db_data:
+  wp_data:
+```
+
+### iv) Nextcloud con MariaDB y Redis en redes separadas
+```yaml
+services:
+  nc:
+    image: nextcloud:apache
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - nc_data:/var/www/html
+    networks:
+      - redisnet
+      - dbnet
+    environment:
+      - REDIS_HOST=redis
+      - MYSQL_HOST=db
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=nextcloud
+
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - redisnet
+    expose:
+      - 6379
+
+  db:
+    image: mariadb:10.5
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - dbnet
+    environment:
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_ROOT_PASSWORD=nextcloud
+      - MYSQL_PASSWORD=nextcloud
+    expose:
+      - 3306
+
+volumes:
+  db_data:
+  nc_data:
+
+networks:
+  dbnet:
+  redisnet:
+```
